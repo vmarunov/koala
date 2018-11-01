@@ -88,6 +88,8 @@ def xlog(a):
 def xmax(*args): # Excel reference: https://support.office.com/en-us/article/MAX-function-e0012414-9ac8-4b34-9a47-73e662c08098
     # ignore non numeric cells and boolean cells
     values = extract_numeric_values(*args)
+    if isinstance(values, ExcelError):
+        return values
 
     # however, if no non numeric cells, return zero (is what excel does)
     if len(values) < 1:
@@ -99,6 +101,8 @@ def xmax(*args): # Excel reference: https://support.office.com/en-us/article/MAX
 def xmin(*args): # Excel reference: https://support.office.com/en-us/article/MIN-function-61635d12-920f-4ce2-a70f-96f202dcc152
     # ignore non numeric cells and boolean cells
     values = extract_numeric_values(*args)
+    if isinstance(values, ExcelError):
+        return values
 
     # however, if no non numeric cells, return zero (is what excel does)
     if len(values) < 1:
@@ -111,6 +115,8 @@ def xsum(*args): # Excel reference: https://support.office.com/en-us/article/SUM
     # ignore non numeric cells and boolean cells
 
     values = extract_numeric_values(*args)
+    if isinstance(values, ExcelError):
+        return values
 
     # however, if no non numeric cells, return zero (is what excel does)
     if len(values) < 1:
@@ -160,6 +166,8 @@ def sumif(range, criteria, sum_range = None): # Excel reference: https://support
 def average(*args): # Excel reference: https://support.office.com/en-us/article/AVERAGE-function-047bac88-d466-426c-a32b-8f33eb960cf6
     # ignore non numeric cells and boolean cells
     values = extract_numeric_values(*args)
+    if isinstance(values, ExcelError):
+        return values
 
     return sum(values) / len(values)
 
@@ -472,8 +480,13 @@ def countifs(*args): # Excel reference: https://support.office.com/en-us/article
         return float('inf')
 
 
-
 def xround(number, num_digits = 0): # Excel reference: https://support.office.com/en-us/article/ROUND-function-c018c5d8-40fb-4053-90b1-b3e7f61a213c
+
+    if isinstance(number, ExcelError):
+        return number
+
+    if isinstance(num_digits, ExcelError):
+        return num_digits
 
     if not is_number(number):
         return ExcelError('#VALUE!', '%s is not a number' % str(number))
@@ -898,7 +911,11 @@ def xnpv(*args): # Excel reference: https://support.office.com/en-us/article/XNP
     rate = args[0]
     # ignore non numeric cells and boolean cells
     values = extract_numeric_values(args[1])
+    if isinstance(values, ExcelError):
+        return values
     dates = extract_numeric_values(args[2])
+    if isinstance(dates, ExcelError):
+        return dates
     if len(values) != len(dates):
         return ExcelError('#NUM!', '`values` range must be the same length as `dates` range in XNPV, %s != %s' % (len(values), len(dates)))
     xnpv = 0

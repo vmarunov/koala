@@ -8,6 +8,8 @@ sys.path.insert(0, path)
 
 from koala.ExcelCompiler import ExcelCompiler
 from koala.Cell import Cell
+from koala.ExcelError import ExcelError
+from koala.Spreadsheet import Spreadsheet
 
 
 class Test_Excel(unittest.TestCase):
@@ -161,6 +163,34 @@ class Test_Excel(unittest.TestCase):
         self.sp.add_cell(Cell('Sheet1!A4', formula = 'A1 + 10'))
         self.sp.set_value('Sheet1!A1', 3)
         self.assertEqual(self.sp.evaluate('Sheet1!A4'), 13)
+
+    def test_na(self):
+        self.assertEquals(self.sp.evaluate('Sheet3!A3'), 3)
+        self.assertEquals(self.sp.evaluate('Sheet3!A4'), 1.5)
+        self.assertEquals(self.sp.evaluate('Sheet3!A5'), 2)
+        self.assertEquals(self.sp.evaluate('Sheet3!A6'), 1)
+        self.assertEquals(self.sp.evaluate('Sheet3!A7'), 1.998)
+
+        self.sp.set_value('Sheet3!A1', '#N/A')
+        self.assertEquals(str(self.sp.evaluate('Sheet3!A3')), '#N/A')
+        self.assertEquals(str(self.sp.evaluate('Sheet3!A4')), '#N/A')
+        self.assertEquals(str(self.sp.evaluate('Sheet3!A5')), '#N/A')
+        self.assertEquals(str(self.sp.evaluate('Sheet3!A6')), '#N/A')
+        self.assertEquals(str(self.sp.evaluate('Sheet3!A7')), '#N/A')
+
+        self.sp.set_value('Sheet3!A1', ExcelError('#N/A'))
+        self.assertEquals(str(self.sp.evaluate('Sheet3!A3')), '#N/A')
+        self.assertEquals(str(self.sp.evaluate('Sheet3!A4')), '#N/A')
+        self.assertEquals(str(self.sp.evaluate('Sheet3!A5')), '#N/A')
+        self.assertEquals(str(self.sp.evaluate('Sheet3!A6')), '#N/A')
+        self.assertEquals(str(self.sp.evaluate('Sheet3!A7')), '#N/A')
+
+    def test_from_dict(self):
+        dict_graph = self.sp.asdict()
+        new_sp = Spreadsheet.from_dict(dict_graph)
+        new_sp.set_value('Sheet3!A1', 100)
+        new_sp.set_value('Sheet3!A2', 200)
+        self.assertEquals(new_sp.evaluate('Sheet3!A3'), 300)
 
 
 if __name__ == '__main__':

@@ -471,6 +471,12 @@ def check_length(range1, range2):
         return range2
 
 def extract_numeric_values(*args):
+
+    def _is_na(value):
+        if isinstance(value, ExcelError) and value.value == '#N/A':
+            return True
+        return value == '#N/A'
+
     values = []
 
     for arg in args:
@@ -478,12 +484,16 @@ def extract_numeric_values(*args):
             for x in arg.values:
                 if is_number(x) and type(x) is not bool: # excludes booleans from nested ranges
                     values.append(x)
+                if _is_na(x):
+                    return ExcelError('#N/A')
         elif type(arg) is tuple or type(arg) is list:
             for x in arg:
                 if is_number(x) and type(x) is not bool: # excludes booleans from nested ranges
                     values.append(x)
         elif is_number(arg):
             values.append(arg)
+        elif _is_na(arg):
+            return ExcelError('#N/A')
 
     return values
 
